@@ -14,13 +14,14 @@
 # limitations under the License.
 #
 
+# API level, the device has been commercially launched on
+PRODUCT_SHIPPING_API_LEVEL := 30
+
+# Setup Non AB
 $(call inherit-product, $(SRC_TARGET_DIR)/product/non_ab_device.mk)
 
 # Setup dalvik vm configs
 $(call inherit-product, frameworks/native/build/phone-xhdpi-6144-dalvik-heap.mk)
-
-# Call the proprietary setup
-$(call inherit-product, vendor/xiaomi/sm6150-common/sm6150-common-vendor.mk)
 
 # Enable project quotas and casefolding for emulated storage without sdcardfs
 $(call inherit-product, $(SRC_TARGET_DIR)/product/emulated_storage.mk)
@@ -46,30 +47,30 @@ PRODUCT_PACKAGES += \
     android.hardware.audio.effect@6.0-impl \
     android.hardware.audio.service \
     android.hardware.bluetooth.audio-impl \
-    android.hardware.soundtrigger@2.2-impl
-
-PRODUCT_PACKAGES += \
+    android.hardware.soundtrigger@2.2-impl \
     audio.bluetooth.default \
     audio.usb.default \
     audio.r_submix.default \
     sound_trigger.primary.sm6150
 
 PRODUCT_PACKAGES += \
+    libaudio-resampler \
     libqcompostprocbundle \
     libqcomvisualizer \
     libqcomvoiceprocessing \
-    libvolumelistener
-
-PRODUCT_PACKAGES += \
-    libaudio-resampler
+    libvolumelistener \
+    sku_sweet_audio_symlink
 
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/audio/audio_effects.xml:$(TARGET_COPY_OUT_VENDOR)/etc/audio_effects.xml \
     $(LOCAL_PATH)/configs/audio/audio_io_policy.conf:$(TARGET_COPY_OUT_VENDOR)/etc/audio_io_policy.conf \
+    $(LOCAL_PATH)/configs/audio/audio_platform_info_intcodec.xml:$(TARGET_COPY_OUT_VENDOR)/etc/audio_platform_info_intcodec.xml \
     $(LOCAL_PATH)/configs/audio/audio_policy_configuration.xml:$(TARGET_COPY_OUT_VENDOR)/etc/audio_policy_configuration.xml \
-    $(LOCAL_PATH)/configs/audio/audio_tuning_mixer_tavil.txt:$(TARGET_COPY_OUT_VENDOR)/etc/audio_tuning_mixer_tavil.txt
-
-PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/configs/audio/audio_tuning_mixer_tavil.txt:$(TARGET_COPY_OUT_VENDOR)/etc/audio_tuning_mixer_tavil.txt \
+    $(LOCAL_PATH)/configs/audio/mixer_paths_idp.xml:$(TARGET_COPY_OUT_VENDOR)/etc/mixer_paths_idp.xml \
+    $(LOCAL_PATH)/configs/audio/mixer_paths_overlay_dynamic.xml:$(TARGET_COPY_OUT_VENDOR)/etc/mixer_paths_overlay_dynamic.xml \
+    $(LOCAL_PATH)/configs/audio/mixer_paths_overlay_static.xml:$(TARGET_COPY_OUT_VENDOR)/etc/mixer_paths_overlay_static.xml \
+    $(LOCAL_PATH)/configs/audio/sound_trigger_mixer_paths.xml:$(TARGET_COPY_OUT_VENDOR)/etc/sound_trigger_mixer_paths.xml \
     $(LOCAL_PATH)/configs/audio/sound_trigger_platform_info.xml:$(TARGET_COPY_OUT_VENDOR)/etc/sound_trigger_platform_info.xml
 
 PRODUCT_COPY_FILES += \
@@ -111,11 +112,14 @@ PRODUCT_PACKAGES += \
     vendor.qti.hardware.memtrack-service
 
 PRODUCT_PACKAGES += \
+    disable_configstore \
     gralloc.sm6150 \
-    hwcomposer.sm6150
+    hwcomposer.sm6150 \
+    hwcomposer.sweet
 
-PRODUCT_PACKAGES += \
-    disable_configstore
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/configs/display/qdcm_calib_data_xiaomi_k6_38_0c_0a_fhd_dsc_video_dsi_panel.xml:$(TARGET_COPY_OUT_VENDOR)/etc/qdcm_calib_data_xiaomi_k6_38_0c_0a_fhd_dsc_video_dsi_panel.xml \
+    $(LOCAL_PATH)/configs/display/qdcm_calib_data_xiaomi_k6_38_0e_0b_fhd_dsc_video_dsi_panel.xml:$(TARGET_COPY_OUT_VENDOR)/etc/qdcm_calib_data_xiaomi_k6_38_0e_0b_fhd_dsc_video_dsi_panel.xml
 
 PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.opengles.aep.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.opengles.aep.xml
@@ -185,12 +189,20 @@ PRODUCT_PACKAGES += \
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/rootdir/etc/init.qcom.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/hw/init.qcom.rc \
     $(LOCAL_PATH)/rootdir/etc/init.qcom.usb.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/hw/init.qcom.usb.rc \
+    $(LOCAL_PATH)/rootdir/etc/init.sweet.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/init.sweet.rc \
     $(LOCAL_PATH)/rootdir/etc/init.target.rc:$(TARGET_COPY_OUT_VENDOR)/etc/init/hw/init.target.rc
 
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/rootdir/bin/init.qcom.post_boot.sh:$(TARGET_COPY_OUT_VENDOR)/bin/init.qcom.post_boot.sh \
     $(LOCAL_PATH)/rootdir/bin/init.qcom.sh:$(TARGET_COPY_OUT_VENDOR)/bin/init.qcom.sh \
     $(LOCAL_PATH)/rootdir/bin/init.qti.early_init.sh:$(TARGET_COPY_OUT_VENDOR)/bin/init.qti.early_init.sh
+
+# IR
+PRODUCT_PACKAGES += \
+    android.hardware.ir-service.xiaomi
+
+PRODUCT_COPY_FILES += \
+    frameworks/native/data/etc/android.hardware.consumerir.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.consumerir.xml
 
 # IRSC
 PRODUCT_COPY_FILES += \
@@ -236,12 +248,33 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.software.ipsec_tunnels.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.software.ipsec_tunnels.xml
 
+# NFC
+PRODUCT_PACKAGES += \
+    com.android.nfc_extras \
+    Tag
+
+PRODUCT_PACKAGES += \
+    android.hardware.nfc-service.nxp
+
+PRODUCT_COPY_FILES += \
+    frameworks/native/data/etc/android.hardware.nfc.hcef.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/sku_sweet/android.hardware.nfc.hcef.xml \
+    frameworks/native/data/etc/android.hardware.nfc.hce.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/sku_sweet/android.hardware.nfc.hce.xml \
+    frameworks/native/data/etc/android.hardware.nfc.uicc.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/sku_sweet/android.hardware.nfc.uicc.xml \
+    frameworks/native/data/etc/android.hardware.nfc.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/sku_sweet/android.hardware.nfc.xml \
+    frameworks/native/data/etc/android.hardware.se.omapi.uicc.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/sku_sweet/android.hardware.se.omapi.uicc.xml \
+    frameworks/native/data/etc/com.android.nfc_extras.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/sku_sweet/com.android.nfc_extras.xml \
+    frameworks/native/data/etc/com.nxp.mifare.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/sku_sweet/com.nxp.mifare.xml
+    
 # Overlay
 DEVICE_PACKAGE_OVERLAYS += \
     $(LOCAL_PATH)/overlay \
     $(LOCAL_PATH)/overlay-lineage
 
-PRODUCT_ENFORCE_RRO_TARGETS += *
+# Overlay-RRO
+PRODUCT_PACKAGES += \
+    SweetinproSettingsProvider \
+    SweetinproWifiOverlay \
+    SweetWifiOverlay
 
 # Partitions
 PRODUCT_USE_DYNAMIC_PARTITIONS := true
@@ -250,6 +283,9 @@ PRODUCT_USE_DYNAMIC_PARTITIONS := true
 PRODUCT_PACKAGES += \
     android.hardware.power-service.lineage-libperfmgr \
     libqti-perfd-client
+
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/configs/power/powerhint.json:$(TARGET_COPY_OUT_VENDOR)/etc/powerhint.json
 
 # QTI
 PRODUCT_COPY_FILES += \
@@ -272,6 +308,10 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/rootdir/etc/init.recovery.qcom.rc:recovery/root/init.recovery.qcom.rc
 
 # Sensors
+PRODUCT_PACKAGES += \
+    android.hardware.sensors@1.0-impl \
+    android.hardware.sensors@1.0-service
+
 PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.sensor.accelerometer.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.sensor.accelerometer.xml \
     frameworks/native/data/etc/android.hardware.sensor.compass.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.sensor.compass.xml \
@@ -290,6 +330,19 @@ PRODUCT_SOONG_NAMESPACES += \
     hardware/lineage/interfaces/power-libperfmgr \
     hardware/qcom-caf/common/libqti-perfd-client \
     hardware/xiaomi
+
+# System properties
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/properties/build_GLOBAL.prop:$(TARGET_COPY_OUT_ODM)/etc/build_GLOBAL.prop \
+    $(LOCAL_PATH)/properties/build_INDIA-pro.prop:$(TARGET_COPY_OUT_ODM)/etc/build_INDIA-pro.prop \
+    $(LOCAL_PATH)/properties/build_INDIA-std.prop:$(TARGET_COPY_OUT_ODM)/etc/build_INDIA-std.prop \
+    $(LOCAL_PATH)/properties/build_JAPAN.prop:$(TARGET_COPY_OUT_ODM)/etc/build_JAPAN.prop
+
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/properties/build_GLOBAL.prop:$(TARGET_COPY_OUT_RECOVERY)/root/build_GLOBAL.prop \
+    $(LOCAL_PATH)/properties/build_INDIA-pro.prop:$(TARGET_COPY_OUT_RECOVERY)/root/build_INDIA-pro.prop \
+    $(LOCAL_PATH)/properties/build_INDIA-std.prop:$(TARGET_COPY_OUT_RECOVERY)/root/build_INDIA-std.prop \
+    $(LOCAL_PATH)/properties/build_JAPAN.prop:$(TARGET_COPY_OUT_RECOVERY)/root/build_JAPAN.prop
 
 # Telephony
 PRODUCT_PACKAGES += \
@@ -335,6 +388,10 @@ PRODUCT_PACKAGES += \
 PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.usb.accessory.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.usb.accessory.xml \
     frameworks/native/data/etc/android.hardware.usb.host.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.usb.host.xml
+
+# Vendor service manager
+PRODUCT_PACKAGES += \
+    vndservicemanager
 
 # Vibrator
 PRODUCT_PACKAGES += \
@@ -386,3 +443,6 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.zram.mark_idle_delay_mins=60 \
     ro.zram.first_wb_delay_mins=1440 \
     ro.zram.periodic_wb_delay_hours=24
+
+# Call the proprietary setup
+$(call inherit-product, vendor/xiaomi/sweet/sweet-vendor.mk)

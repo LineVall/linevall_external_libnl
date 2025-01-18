@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-import common
+import device
 import re
 
 def FullOTA_Assertions(info):
